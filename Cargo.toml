@@ -4,5 +4,7 @@ version = "0.1.0"
 authors = ["Zachary Pierce <zpierce@polysync.io>"]
 
 [dependencies]
-toml = "0.4"
 cmake = "0.1"
+failure = "0.1"
+multimap = "0.4"
+toml = "0.4"
