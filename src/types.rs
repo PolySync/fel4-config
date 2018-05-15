@@ -1,27 +1,10 @@
-use multimap::MultiMap;
 use std::collections::HashMap;
 use std::str::FromStr;
 use toml;
 
-/// The full content of a fel4 manifest
-pub struct FullFel4Manifest {
-    pub artifact_path: String,
-    pub target_specs_path: String,
-    pub selected_target: SupportedTarget,
-    pub selected_platform: SupportedPlatform,
-    pub targets: HashMap<SupportedTarget, FullFel4Target>,
-}
-
-/// The full content of a target within a fel4 manifest
-pub struct FullFel4Target {
-    pub identity: SupportedTarget,
-    pub direct_properties: Vec<FlatTomlProperty>,
-    pub build_profile_properties: MultiMap<BuildProfile, FlatTomlProperty>,
-    pub platform_properties: MultiMap<SupportedPlatform, FlatTomlProperty>,
-}
-
-/// Fel4 configuration for a particular target, platform, and build profile tuple
-/// resolved from a FullFel4Target
+/// Fel4 configuration for a particular target, platform, and build profile
+/// tuple resolved from a FullFel4Target
+#[derive(Clone, Debug, PartialEq)]
 pub struct Fel4Config {
     pub artifact_path: String,
     pub target_specs_path: String,
@@ -31,7 +14,8 @@ pub struct Fel4Config {
     pub properties: HashMap<String, FlatTomlValue>,
 }
 
-/// A single toml key-value pair where the value only includes non-nestable structures
+/// A single toml key-value pair where the value only includes non-nestable
+/// structures
 #[derive(PartialEq, Clone, Debug)]
 pub struct FlatTomlProperty {
     pub name: String,
@@ -65,8 +49,8 @@ pub enum SupportedTarget {
     ArmSel4Fel4,
 }
 
-const TARGET_X86_64_SEL4_FEL4: &'static str = "x86_64-sel4-fel4";
-const TARGET_ARM_SEL4_FEL4: &'static str = "arm-sel4-fel4";
+const TARGET_X86_64_SEL4_FEL4: &str = "x86_64-sel4-fel4";
+const TARGET_ARM_SEL4_FEL4: &str = "arm-sel4-fel4";
 
 impl SupportedTarget {
     pub fn full_name(&self) -> &'static str {
@@ -106,8 +90,8 @@ pub enum SupportedPlatform {
     Sabre,
 }
 
-const PLATFORM_PC99: &'static str = "pc99";
-const PLATFORM_SABRE: &'static str = "sabre";
+const PLATFORM_PC99: &str = "pc99";
+const PLATFORM_SABRE: &str = "sabre";
 
 impl SupportedPlatform {
     pub fn full_name(&self) -> &'static str {
@@ -141,13 +125,13 @@ impl FromStr for SupportedPlatform {
     }
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
 pub enum BuildProfile {
     Debug,
     Release,
 }
-const BUILD_PROFILE_DEBUG: &'static str = "debug";
-const BUILD_PROFILE_RELEASE: &'static str = "release";
+const BUILD_PROFILE_DEBUG: &str = "debug";
+const BUILD_PROFILE_RELEASE: &str = "release";
 impl BuildProfile {
     pub fn full_name(&self) -> &'static str {
         match *self {
