@@ -5,8 +5,8 @@ authors = ["Zachary Pierce <zpierce@polysync.io>"]
 
 [dependencies]
 cmake = "0.1"
-failure = "0.1"
-multimap = "0.4"
+failure = { version = "0.1", default-features = false, features = ["derive"] }
+multimap = { version = "0.4", default-features = false }
 toml = "0.4"
 
 [dev-dependencies]
