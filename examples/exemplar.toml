@@ -6,10 +6,9 @@ platform = "pc99"
 
 [x86_64-sel4-fel4]
 BuildWithCommonSimulationSettings = true
-KernelOptimisation = "-02"
+KernelOptimisation = "-O2"
 KernelVerificationBuild = false
 KernelBenchmarks = "none"
-KernelDangerousCodeInjection = false
 KernelFastpath = true
 LibSel4FunctionAttributes = "public"
 KernelNumDomains = 1
@@ -73,10 +72,9 @@ KernelPrinting = false
 
 [arm-sel4-fel4]
 BuildWithCommonSimulationSettings = true
-KernelOptimisation = "-02"
+KernelOptimisation = "-O2"
 KernelVerificationBuild = false
 KernelBenchmarks = "none"
-KernelDangerousCodeInjection = false
 KernelFastpath = true
 LibSel4FunctionAttributes = "public"
 KernelNumDomains = 1

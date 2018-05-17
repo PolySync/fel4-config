@@ -1,15 +1,17 @@
 extern crate fel4_config;
+extern crate tempfile;
 
 use fel4_config::*;
-use std::path::PathBuf;
+use std::io::Write;
+use tempfile::NamedTempFile;
 
 #[test]
 fn get_full_manifest_happy_path() {
-    let fel4_manifest = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("test_configs/fel4.toml");
-    let manifest =
-        get_full_manifest(fel4_manifest).expect("Should be able to read the default fel4.toml");
+    let fel4_manifest = write_exemplar_toml_to_temp_file();
+    let manifest = get_full_manifest(fel4_manifest.path())
+        .expect("Should be able to read the default fel4.toml");
     assert_eq!("artifacts", manifest.artifact_path);
-    assert_eq!("targets", manifest.target_specs_path);
+    assert_eq!("target_specs", manifest.target_specs_path);
     assert_eq!(SupportedTarget::X8664Sel4Fel4, manifest.selected_target);
     assert_eq!(SupportedPlatform::PC99, manifest.selected_platform);
     assert_eq!(2, manifest.targets.len());
@@ -77,18 +79,43 @@ fn get_full_manifest_happy_path() {
     );
 }
 
+fn write_exemplar_toml_to_temp_file() -> NamedTempFile {
+    let mut tmpfile = NamedTempFile::new().unwrap();
+    write!(tmpfile, "{}", get_exemplar_default_toml()).unwrap();
+    tmpfile.flush().unwrap();
+    tmpfile
+}
+
 #[test]
-fn get_resolved_manifest_happy_path() {
-    let fel4_manifest = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("test_configs/fel4.toml");
-    let full =
-        get_full_manifest(fel4_manifest).expect("Should be able to read the default fel4.toml");
-    let manifest = resolve_fel4_config(full, &BuildProfile::Debug)
+fn get_resolved_x86_64_manifest_happy_path() {
+    let manifest_file = write_exemplar_toml_to_temp_file();
+    let full = get_full_manifest(manifest_file.path())
+        .expect("Should be able to read the default fel4.toml");
+    let config = resolve_fel4_config(full, &BuildProfile::Debug)
         .expect("Should have been able to resolve all this");
-    assert_eq!(SupportedTarget::X8664Sel4Fel4, manifest.target);
-    assert_eq!(SupportedPlatform::PC99, manifest.platform);
-    assert_eq!(BuildProfile::Debug, manifest.build_profile);
+    assert_eq!(SupportedTarget::X8664Sel4Fel4, config.target);
+    assert_eq!(SupportedPlatform::PC99, config.platform);
+    assert_eq!(BuildProfile::Debug, config.build_profile);
     assert_eq!(
         &FlatTomlValue::String("x86".to_string()),
-        manifest.properties.get("KernelArch").unwrap()
+        config.properties.get("KernelArch").unwrap()
+    );
+}
+
+#[test]
+fn get_resolved_arm_manifest_happy_path() {
+    let manifest_file = write_exemplar_toml_to_temp_file();
+    let mut full = get_full_manifest(manifest_file.path())
+        .expect("Should be able to read the default fel4.toml");
+    full.selected_target = SupportedTarget::ArmSel4Fel4;
+    full.selected_platform = SupportedPlatform::Sabre;
+    let config = resolve_fel4_config(full, &BuildProfile::Debug)
+        .expect("Should have been able to resolve all this");
+    assert_eq!(SupportedTarget::ArmSel4Fel4, config.target);
+    assert_eq!(SupportedPlatform::Sabre, config.platform);
+    assert_eq!(BuildProfile::Debug, config.build_profile);
+    assert_eq!(
+        &FlatTomlValue::String("arm".to_string()),
+        config.properties.get("KernelArch").unwrap()
     );
 }

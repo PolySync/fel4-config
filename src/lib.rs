@@ -4,7 +4,7 @@ extern crate failure;
 extern crate multimap;
 extern crate toml;
 use std::borrow::Borrow;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::env;
 use std::path::{Path, PathBuf};
 
@@ -43,6 +43,8 @@ pub enum ConfigError {
         _0
     )]
     DuplicateProperty(String),
+    #[fail(display = "The {} property was supplied, but is not on the permitted whitelist", _0)]
+    NonWhitelistProperty(String),
 }
 
 /// Resolve and validate a particular Fel4 configuration for the given
@@ -84,6 +86,15 @@ pub fn resolve_fel4_config<M: Borrow<FullFel4Manifest>>(
             ))
         })?;
     add_properties_to_map(&mut properties, platform_properties)?;
+    let whitelist: HashSet<String> = ALL_PROPERTIES_WHITELIST
+        .iter()
+        .map(|s| s.to_string())
+        .collect();
+    for k in properties.keys() {
+        if !whitelist.contains(k) {
+            return Err(ConfigError::NonWhitelistProperty(k.to_string()));
+        }
+    }
 
     Ok(Fel4Config {
         artifact_path: full.borrow().artifact_path.clone(),
@@ -108,6 +119,75 @@ fn add_properties_to_map(
     Ok(())
 }
 
+const ALL_PROPERTIES_WHITELIST: &'static [&'static str] = &[
+    "BuildWithCommonSimulationSettings",
+    "KernelOptimisation",
+    "KernelVerificationBuild",
+    "KernelBenchmarks",
+    "KernelFastpath",
+    "LibSel4FunctionAttributes",
+    "KernelNumDomains",
+    "HardwareDebugAPI",
+    "KernelColourPrinting",
+    "KernelFWholeProgram",
+    "KernelResetChunkBits",
+    "LibSel4DebugAllocBufferEntries",
+    "LibSel4DebugFunctionInstrumentation",
+    "KernelNumPriorities",
+    "KernelStackBits",
+    "KernelTimeSlice",
+    "KernelTimerTickMS",
+    "KernelUserStackTraceLength",
+    "KernelArch",
+    "KernelX86Sel4Arch",
+    "KernelMaxNumNodes",
+    "KernelRetypeFanOutLimit",
+    "KernelRootCNodeSizeBits",
+    "KernelMaxNumBootinfoUntypedCaps",
+    "KernelSupportPCID",
+    "KernelCacheLnSz",
+    "KernelDebugDisablePrefetchers",
+    "KernelExportPMCUser",
+    "KernelFPU",
+    "KernelFPUMaxRestoresSinceSwitch",
+    "KernelFSGSBase",
+    "KernelHugePage",
+    "KernelIOMMU",
+    "KernelIRQController",
+    "KernelIRQReporting",
+    "KernelLAPICMode",
+    "KernelMaxNumIOAPIC",
+    "KernelMaxNumWorkUnitsPerPreemption",
+    "KernelMultiboot1Header",
+    "KernelMultiboot2Header",
+    "KernelMultibootGFXMode",
+    "KernelSkimWindow",
+    "KernelSyscall",
+    "KernelVTX",
+    "KernelX86DangerousMSR",
+    "KernelX86IBPBOnContextSwitch",
+    "KernelX86IBRSMode",
+    "KernelX86RSBOnContextSwitch",
+    "KernelXSaveSize",
+    "LinkPageSize",
+    "UserLinkerGCSections",
+    "KernelX86MicroArch",
+    "LibPlatSupportX86ConsoleDevice",
+    "KernelDebugBuild",
+    "KernelPrinting",
+    "CROSS_COMPILER_PREFIX",
+    "KernelArmSel4Arch",
+    "KernelAArch32FPUEnableContextSwitch",
+    "KernelDebugDisableBranchPrediction",
+    "KernelIPCBufferLocation",
+    "KernelARMPlatform",
+    "ElfloaderImage",
+    "ElfloaderMode",
+    "ElfloaderErrata764369",
+    "KernelArmEnableA9Prefetcher",
+    "KernelArmExportPMUUser",
+    "KernelDebugDisableL2Cache",
+];
 /// Things that can go wrong when trying to rely on environment variables
 /// to locate the fel4 manifest and its parameterization.
 #[derive(Clone, Debug, Fail, PartialEq)]
@@ -181,13 +261,65 @@ mod tests {
             artifact-path = "artifacts/path/nested"
             target-specs-path = "where/are/rust/targets"
             [arm-sel4-fel4]
-            KernelPrinting = false
+            KernelOptimisation = "-O2"
             [arm-sel4-fel4.debug]
             KernelPrinting = true
             "#,
         ).expect("Should have been able to parse manifest");
         assert_eq!(
             Err(ConfigError::MissingTable("x86_64-sel4-fel4".into())),
+            resolve_fel4_config(manifest, &BuildProfile::Debug)
+        );
+    }
+
+    #[test]
+    fn duplicate_property_gets_caught_in_config_resolution() {
+        let manifest = parse_full_manifest(
+            r#"[fel4]
+            target = "x86_64-sel4-fel4"
+            platform = "pc99"
+            artifact-path = "artifacts/path/nested"
+            target-specs-path = "where/are/rust/targets"
+
+            [x86_64-sel4-fel4]
+            KernelPrinting = false
+
+            [x86_64-sel4-fel4.debug]
+            KernelPrinting = true
+
+            [x86_64-sel4-fel4.pc99]
+            KernelX86MicroArch = "nehalem"
+            "#,
+        ).expect("Should have been able to parse manifest");
+        assert_eq!(
+            Err(ConfigError::DuplicateProperty("KernelPrinting".into())),
+            resolve_fel4_config(manifest, &BuildProfile::Debug)
+        );
+    }
+
+    #[test]
+    fn non_whitelist_property_gets_caught_in_config_resolution() {
+        let manifest = parse_full_manifest(
+            r#"[fel4]
+            target = "x86_64-sel4-fel4"
+            platform = "pc99"
+            artifact-path = "artifacts/path/nested"
+            target-specs-path = "where/are/rust/targets"
+
+            [x86_64-sel4-fel4]
+            KernelArch = "x86"
+
+            [x86_64-sel4-fel4.debug]
+            KernelPrinting = true
+
+            [x86_64-sel4-fel4.pc99]
+            SomeUnallowedProperty = "foo"
+            "#,
+        ).expect("Should have been able to parse manifest");
+        assert_eq!(
+            Err(ConfigError::NonWhitelistProperty(
+                "SomeUnallowedProperty".into()
+            )),
             resolve_fel4_config(manifest, &BuildProfile::Debug)
         );
     }
