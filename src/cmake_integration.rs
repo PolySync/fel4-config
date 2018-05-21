@@ -37,17 +37,17 @@ pub fn configure_cmake_build<P: AsRef<Path>>(
         ));
     }
 
-    // Supply additional cross compilation toolchain guidance for arm,
-    // since the seL4-CMake inferred option doesn't support hardware floating point
-    if fel4_config.target == SupportedTarget::ArmSel4Fel4 {
-        cmake_config.define("CROSS_COMPILER_PREFIX", "arm-linux-gnueabihf-");
-    }
-
     // CMAKE_TOOLCHAIN_FILE is resolved immediately by CMake
     cmake_config.define("CMAKE_TOOLCHAIN_FILE", kernel_path.join("gcc.cmake"));
     cmake_config.define("KERNEL_PATH", kernel_path);
 
     add_cmake_definitions(cmake_config, &fel4_config.properties);
+
+    // Supply additional cross compilation toolchain guidance for arm,
+    // since the seL4-CMake inferred option doesn't support hardware floating point
+    if fel4_config.target == SupportedTarget::ArmSel4Fel4 {
+        cmake_config.define("CROSS_COMPILER_PREFIX", "arm-linux-gnueabihf-");
+    }
 
     // seL4 handles these so we clear them to prevent cmake-rs from
     // auto-populating
