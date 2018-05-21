@@ -90,7 +90,6 @@ KernelTimeSlice = 5
 KernelTimerTickMS = 2
 KernelUserStackTraceLength = 16
 # the following keys are specific to arm-sel4-fel4 targets
-CROSS_COMPILER_PREFIX = "arm-linux-gnueabihf-"
 KernelArch = "arm"
 KernelArmSel4Arch = "aarch32"
 KernelMaxNumNodes = 1

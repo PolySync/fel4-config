@@ -175,7 +175,6 @@ const ALL_PROPERTIES_WHITELIST: &'static [&'static str] = &[
     "LibPlatSupportX86ConsoleDevice",
     "KernelDebugBuild",
     "KernelPrinting",
-    "CROSS_COMPILER_PREFIX",
     "KernelArmSel4Arch",
     "KernelAArch32FPUEnableContextSwitch",
     "KernelDebugDisableBranchPrediction",
