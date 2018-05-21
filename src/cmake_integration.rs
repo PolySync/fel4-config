@@ -30,13 +30,17 @@ pub fn configure_cmake_build<P: AsRef<Path>>(
 ) -> Result<(), CmakeConfigurationError> {
     let kernel_path = cargo_manifest_dir.as_ref().join("deps").join("seL4_kernel");
 
-    // println!("cargo:rerun-if-changed={}", fel4_manifest.display());  // TODO -
-    // move this to the calling location
     if cargo_target != fel4_config.target.full_name() {
         return Err(CmakeConfigurationError::CargoTargetToFel4TargetMismatch(
             cargo_target.to_string(),
             fel4_config.target.full_name().to_string(),
         ));
+    }
+
+    // Supply additional cross compilation toolchain guidance for arm,
+    // since the seL4-CMake inferred option doesn't support hardware floating point
+    if fel4_config.target == SupportedTarget::ArmSel4Fel4 {
+        cmake_config.define("CROSS_COMPILER_PREFIX", "arm-linux-gnueabihf-");
     }
 
     // CMAKE_TOOLCHAIN_FILE is resolved immediately by CMake
