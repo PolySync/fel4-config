@@ -67,7 +67,7 @@ fn get_full_manifest_happy_path() {
             .unwrap()
             .value
     );
-    let arm_target = manifest.targets.get(&SupportedTarget::ArmSel4Fel4).unwrap();
+    let arm_target = manifest.targets.get(&SupportedTarget::Armv7Sel4Fel4).unwrap();
     assert_eq!(
         FlatTomlValue::String("aarch32".to_string()),
         arm_target
@@ -107,11 +107,11 @@ fn get_resolved_arm_manifest_happy_path() {
     let manifest_file = write_exemplar_toml_to_temp_file();
     let mut full = get_full_manifest(manifest_file.path())
         .expect("Should be able to read the default fel4.toml");
-    full.selected_target = SupportedTarget::ArmSel4Fel4;
+    full.selected_target = SupportedTarget::Armv7Sel4Fel4;
     full.selected_platform = SupportedPlatform::Sabre;
     let config = resolve_fel4_config(full, &BuildProfile::Debug)
         .expect("Should have been able to resolve all this");
-    assert_eq!(SupportedTarget::ArmSel4Fel4, config.target);
+    assert_eq!(SupportedTarget::Armv7Sel4Fel4, config.target);
     assert_eq!(SupportedPlatform::Sabre, config.platform);
     assert_eq!(BuildProfile::Debug, config.build_profile);
     assert_eq!(

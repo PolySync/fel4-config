@@ -259,9 +259,9 @@ mod tests {
             platform = "pc99"
             artifact-path = "artifacts/path/nested"
             target-specs-path = "where/are/rust/targets"
-            [arm-sel4-fel4]
+            [armv7-sel4-fel4]
             KernelOptimisation = "-O2"
-            [arm-sel4-fel4.debug]
+            [armv7-sel4-fel4.debug]
             KernelPrinting = true
             "#,
         ).expect("Should have been able to parse manifest");

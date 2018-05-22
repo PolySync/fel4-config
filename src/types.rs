@@ -46,22 +46,22 @@ pub enum FlatTomlValue {
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum SupportedTarget {
     X8664Sel4Fel4,
-    ArmSel4Fel4,
+    Armv7Sel4Fel4,
 }
 
 const TARGET_X86_64_SEL4_FEL4: &str = "x86_64-sel4-fel4";
-const TARGET_ARM_SEL4_FEL4: &str = "arm-sel4-fel4";
+const TARGET_ARMV7_SEL4_FEL4: &str = "armv7-sel4-fel4";
 
 impl SupportedTarget {
     pub fn full_name(&self) -> &'static str {
         match *self {
             SupportedTarget::X8664Sel4Fel4 => TARGET_X86_64_SEL4_FEL4,
-            SupportedTarget::ArmSel4Fel4 => TARGET_ARM_SEL4_FEL4,
+            SupportedTarget::Armv7Sel4Fel4 => TARGET_ARMV7_SEL4_FEL4,
         }
     }
 
     pub fn targets() -> Vec<SupportedTarget> {
-        vec![SupportedTarget::X8664Sel4Fel4, SupportedTarget::ArmSel4Fel4]
+        vec![SupportedTarget::X8664Sel4Fel4, SupportedTarget::Armv7Sel4Fel4]
     }
 
     pub fn target_names() -> Vec<String> {
@@ -78,7 +78,7 @@ impl FromStr for SupportedTarget {
     fn from_str(s: &str) -> Result<Self, <Self as FromStr>::Err> {
         match s {
             TARGET_X86_64_SEL4_FEL4 => Ok(SupportedTarget::X8664Sel4Fel4),
-            TARGET_ARM_SEL4_FEL4 => Ok(SupportedTarget::ArmSel4Fel4),
+            TARGET_ARMV7_SEL4_FEL4 => Ok(SupportedTarget::Armv7Sel4Fel4),
             _ => Err(s.to_string()),
         }
     }

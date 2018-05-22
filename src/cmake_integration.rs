@@ -45,7 +45,7 @@ pub fn configure_cmake_build<P: AsRef<Path>>(
 
     // Supply additional cross compilation toolchain guidance for arm,
     // since the seL4-CMake inferred option doesn't support hardware floating point
-    if fel4_config.target == SupportedTarget::ArmSel4Fel4 {
+    if fel4_config.target == SupportedTarget::Armv7Sel4Fel4 {
         cmake_config.define("CROSS_COMPILER_PREFIX", "arm-linux-gnueabihf-");
     }
 
@@ -130,11 +130,11 @@ mod tests {
             &mut c,
             &fel4_config,
             Path::new("./some/repo"),
-            "arm-sel4-fel4",
+            "armv7-sel4-fel4",
         );
         assert_eq!(
             Err(CmakeConfigurationError::CargoTargetToFel4TargetMismatch(
-                "arm-sel4-fel4".to_string(),
+                "armv7-sel4-fel4".to_string(),
                 "x86_64-sel4-fel4".to_string()
             )),
             r
