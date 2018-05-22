@@ -88,13 +88,13 @@ fn add_cmake_definitions(
 
 fn add_cmake_definition(config: &mut CmakeConfig, name: &str, value: &FlatTomlValue) {
     match value {
-        FlatTomlValue::Boolean(b) => {
-            config.define(format!("{}:BOOL", name), if *b { "ON" } else { "OFF" })
+        &FlatTomlValue::Boolean(b) => {
+            config.define(format!("{}:BOOL", name), if b { "ON" } else { "OFF" })
         }
-        FlatTomlValue::Integer(i) => config.define(name, i.to_string()),
-        FlatTomlValue::String(s) => config.define(name, s),
-        FlatTomlValue::Float(f) => config.define(name, f.to_string()),
-        FlatTomlValue::Datetime(d) => config.define(name, format!("{}", d)),
+        &FlatTomlValue::Integer(i) => config.define(name, i.to_string()),
+        &FlatTomlValue::String(ref s) => config.define(name, s),
+        &FlatTomlValue::Float(f) => config.define(name, f.to_string()),
+        &FlatTomlValue::Datetime(ref d) => config.define(name, format!("{}", d)),
     };
 }
 #[cfg(test)]
