@@ -66,7 +66,7 @@ fn parse_fel4_header(raw: &toml::Value) -> Result<Fel4Header, ConfigError> {
     let selected_target: SupportedTarget = fel4_table
         .get("target")
         .and_then(toml::Value::as_str)
-        .filter(|s| !s.is_empty())
+        .and_then(|s| if s.is_empty() { None } else { Some(s) })
         .ok_or_else(|| ConfigError::MissingRequiredProperty("fel4".into(), "target".into()))?
         .parse()
         .map_err(|e| {
@@ -75,7 +75,7 @@ fn parse_fel4_header(raw: &toml::Value) -> Result<Fel4Header, ConfigError> {
     let selected_platform: SupportedPlatform = fel4_table
         .get("platform")
         .and_then(toml::Value::as_str)
-        .filter(|s| !s.is_empty())
+        .and_then(|s| if s.is_empty() { None } else { Some(s) })
         .ok_or_else(|| ConfigError::MissingRequiredProperty("fel4".into(), "platform".into()))?
         .parse()
         .map_err(|e| {
@@ -197,7 +197,7 @@ pub fn toml_to_full_manifest(raw: &toml::Value) -> Result<FullFel4Manifest, Conf
 
         let table_minus_approved_subtables = curr_target_table
             .iter()
-            .filter(|(k, _)| !allowed_target_subtable_names.contains(&(*k).clone()))
+            .filter(|&(k, _)| !allowed_target_subtable_names.contains(&(*k).clone()))
             .map(|(k, v)| (k.clone(), v.clone()))
             .collect();
         let direct_properties =
@@ -231,7 +231,7 @@ fn has_only_approved_substructures(
 ) -> Result<(), String> {
     for (k, v) in map {
         match v {
-            toml::Value::Array(_) | toml::Value::Table(_) => {
+            &toml::Value::Array(_) | toml::Value::Table(_) => {
                 if let Some(substructure_whitelist) = approved_substructures {
                     if substructure_whitelist.contains(k) {
                         continue;
@@ -254,12 +254,12 @@ fn extract_flat_properties(
     let mut v = Vec::new();
     for (prop_name, value) in table {
         let flat_value = match value {
-            toml::Value::String(v) => FlatTomlValue::String(v.to_string()),
-            toml::Value::Integer(v) => FlatTomlValue::Integer(*v),
-            toml::Value::Float(v) => FlatTomlValue::Float(*v),
-            toml::Value::Boolean(v) => FlatTomlValue::Boolean(*v),
-            toml::Value::Datetime(v) => FlatTomlValue::Datetime(v.clone()),
-            toml::Value::Array(_) | toml::Value::Table(_) => {
+            &toml::Value::String(ref v) => FlatTomlValue::String(v.to_string()),
+            &toml::Value::Integer(v) => FlatTomlValue::Integer(v),
+            &toml::Value::Float(v) => FlatTomlValue::Float(v),
+            &toml::Value::Boolean(v) => FlatTomlValue::Boolean(v),
+            &toml::Value::Datetime(ref v) => FlatTomlValue::Datetime(v.clone()),
+            &toml::Value::Array(_) | toml::Value::Table(_) => {
                 return Err(prop_name.to_string());
             }
         };

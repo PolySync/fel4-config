@@ -322,5 +322,4 @@ mod tests {
             resolve_fel4_config(manifest, &BuildProfile::Debug)
         );
     }
-
 }
