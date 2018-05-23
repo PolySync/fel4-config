@@ -56,7 +56,8 @@ pub fn resolve_fel4_config<M: Borrow<FullFel4Manifest>>(
 ) -> Result<Fel4Config, ConfigError> {
     let selected_target = full.borrow().selected_target.clone();
     let platform = full.borrow().selected_platform.clone();
-    let target = full.borrow()
+    let target = full
+        .borrow()
         .targets
         .get(&selected_target)
         .ok_or_else(|| ConfigError::MissingTable(selected_target.full_name().to_string()))?;

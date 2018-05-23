@@ -14,7 +14,7 @@ fn get_full_manifest_happy_path() {
     assert_eq!("target_specs", manifest.target_specs_path);
     assert_eq!(SupportedTarget::X8664Sel4Fel4, manifest.selected_target);
     assert_eq!(SupportedPlatform::PC99, manifest.selected_platform);
-    assert_eq!(2, manifest.targets.len());
+    assert_eq!(3, manifest.targets.len());
     let x86_target = manifest
         .targets
         .get(&SupportedTarget::X8664Sel4Fel4)
@@ -67,10 +67,26 @@ fn get_full_manifest_happy_path() {
             .unwrap()
             .value
     );
-    let arm_target = manifest.targets.get(&SupportedTarget::Armv7Sel4Fel4).unwrap();
+    let armv7_target = manifest
+        .targets
+        .get(&SupportedTarget::Armv7Sel4Fel4)
+        .unwrap();
     assert_eq!(
         FlatTomlValue::String("aarch32".to_string()),
-        arm_target
+        armv7_target
+            .direct_properties
+            .iter()
+            .find(|p| p.name == "KernelArmSel4Arch")
+            .unwrap()
+            .value
+    );
+    let aarch64_target = manifest
+        .targets
+        .get(&SupportedTarget::Aarch64Sel4Fel4)
+        .unwrap();
+    assert_eq!(
+        FlatTomlValue::String("aarch64".to_string()),
+        aarch64_target
             .direct_properties
             .iter()
             .find(|p| p.name == "KernelArmSel4Arch")
@@ -103,7 +119,7 @@ fn get_resolved_x86_64_manifest_happy_path() {
 }
 
 #[test]
-fn get_resolved_arm_manifest_happy_path() {
+fn get_resolved_armv7_manifest_happy_path() {
     let manifest_file = write_exemplar_toml_to_temp_file();
     let mut full = get_full_manifest(manifest_file.path())
         .expect("Should be able to read the default fel4.toml");
@@ -113,6 +129,24 @@ fn get_resolved_arm_manifest_happy_path() {
         .expect("Should have been able to resolve all this");
     assert_eq!(SupportedTarget::Armv7Sel4Fel4, config.target);
     assert_eq!(SupportedPlatform::Sabre, config.platform);
+    assert_eq!(BuildProfile::Debug, config.build_profile);
+    assert_eq!(
+        &FlatTomlValue::String("arm".to_string()),
+        config.properties.get("KernelArch").unwrap()
+    );
+}
+
+#[test]
+fn get_resolved_aarch64_manifest_happy_path() {
+    let manifest_file = write_exemplar_toml_to_temp_file();
+    let mut full = get_full_manifest(manifest_file.path())
+        .expect("Should be able to read the default fel4.toml");
+    full.selected_target = SupportedTarget::Aarch64Sel4Fel4;
+    full.selected_platform = SupportedPlatform::Tx1;
+    let config = resolve_fel4_config(full, &BuildProfile::Debug)
+        .expect("Should have been able to resolve all this");
+    assert_eq!(SupportedTarget::Aarch64Sel4Fel4, config.target);
+    assert_eq!(SupportedPlatform::Tx1, config.platform);
     assert_eq!(BuildProfile::Debug, config.build_profile);
     assert_eq!(
         &FlatTomlValue::String("arm".to_string()),

@@ -56,7 +56,8 @@ struct Fel4Header {
 
 /// Internal convenience to break out the header table parsing
 fn parse_fel4_header(raw: &toml::Value) -> Result<Fel4Header, ConfigError> {
-    let fel4_table = raw.get("fel4")
+    let fel4_table = raw
+        .get("fel4")
         .and_then(toml::Value::as_table)
         .ok_or_else(|| ConfigError::MissingTable("fel4".into()))?;
 
