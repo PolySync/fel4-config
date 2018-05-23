@@ -47,6 +47,8 @@ pub fn configure_cmake_build<P: AsRef<Path>>(
     // since the seL4-CMake inferred option doesn't support hardware floating point
     if fel4_config.target == SupportedTarget::Armv7Sel4Fel4 {
         cmake_config.define("CROSS_COMPILER_PREFIX", "arm-linux-gnueabihf-");
+    } else if fel4_config.target == SupportedTarget::Aarch64Sel4Fel4 {
+        cmake_config.define("CROSS_COMPILER_PREFIX", "aarch64-linux-gnu-");
     }
 
     // seL4 handles these so we clear them to prevent cmake-rs from

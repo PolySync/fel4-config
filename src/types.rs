@@ -47,21 +47,28 @@ pub enum FlatTomlValue {
 pub enum SupportedTarget {
     X8664Sel4Fel4,
     Armv7Sel4Fel4,
+    Aarch64Sel4Fel4,
 }
 
 const TARGET_X86_64_SEL4_FEL4: &str = "x86_64-sel4-fel4";
 const TARGET_ARMV7_SEL4_FEL4: &str = "armv7-sel4-fel4";
+const TARGET_AARCH64_SEL4_FEL4: &str = "aarch64-sel4-fel4";
 
 impl SupportedTarget {
     pub fn full_name(&self) -> &'static str {
         match *self {
             SupportedTarget::X8664Sel4Fel4 => TARGET_X86_64_SEL4_FEL4,
             SupportedTarget::Armv7Sel4Fel4 => TARGET_ARMV7_SEL4_FEL4,
+            SupportedTarget::Aarch64Sel4Fel4 => TARGET_AARCH64_SEL4_FEL4,
         }
     }
 
     pub fn targets() -> Vec<SupportedTarget> {
-        vec![SupportedTarget::X8664Sel4Fel4, SupportedTarget::Armv7Sel4Fel4]
+        vec![
+            SupportedTarget::X8664Sel4Fel4,
+            SupportedTarget::Armv7Sel4Fel4,
+            SupportedTarget::Aarch64Sel4Fel4,
+        ]
     }
 
     pub fn target_names() -> Vec<String> {
@@ -79,6 +86,7 @@ impl FromStr for SupportedTarget {
         match s {
             TARGET_X86_64_SEL4_FEL4 => Ok(SupportedTarget::X8664Sel4Fel4),
             TARGET_ARMV7_SEL4_FEL4 => Ok(SupportedTarget::Armv7Sel4Fel4),
+            TARGET_AARCH64_SEL4_FEL4 => Ok(SupportedTarget::Aarch64Sel4Fel4),
             _ => Err(s.to_string()),
         }
     }
@@ -88,21 +96,28 @@ impl FromStr for SupportedTarget {
 pub enum SupportedPlatform {
     PC99,
     Sabre,
+    Tx1,
 }
 
 const PLATFORM_PC99: &str = "pc99";
 const PLATFORM_SABRE: &str = "sabre";
+const PLATFORM_TX1: &str = "tx1";
 
 impl SupportedPlatform {
     pub fn full_name(&self) -> &'static str {
         match *self {
             SupportedPlatform::PC99 => PLATFORM_PC99,
             SupportedPlatform::Sabre => PLATFORM_SABRE,
+            SupportedPlatform::Tx1 => PLATFORM_TX1,
         }
     }
 
     pub fn platforms() -> Vec<SupportedPlatform> {
-        vec![SupportedPlatform::PC99, SupportedPlatform::Sabre]
+        vec![
+            SupportedPlatform::PC99,
+            SupportedPlatform::Sabre,
+            SupportedPlatform::Tx1,
+        ]
     }
 
     pub fn platform_names() -> Vec<String> {
@@ -120,6 +135,7 @@ impl FromStr for SupportedPlatform {
         match s {
             PLATFORM_PC99 => Ok(SupportedPlatform::PC99),
             PLATFORM_SABRE => Ok(SupportedPlatform::Sabre),
+            PLATFORM_TX1 => Ok(SupportedPlatform::Tx1),
             _ => Err(s.to_string()),
         }
     }
