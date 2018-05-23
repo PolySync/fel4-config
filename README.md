@@ -1,6 +1,6 @@
 # fel4-config
 
-Parsing, transformation and validation for fel4 manifests.
+Parsing, transformation and validation for feL4 manifests.
 
 ## Overview
 
@@ -28,19 +28,19 @@ cargo build
 
 ## Usage
 
-fel4 manifest files are typically named `fel4.toml` and live at the root directory of a
-fel4 project.  You typically don't have to manufacture them from scratch, as the
+feL4 manifest files are typically named `fel4.toml` and live at the root directory of a
+feL4 project.  You typically don't have to manufacture them from scratch, as the
 cargo-fel4 tool will generate a complete manifest as part of the `cargo fel4 new` command.
 
 
-A fel4 manifest consists of a `[fel4]` header section followed by target-specific tables.
+A feL4 manifest consists of a `[fel4]` header section followed by target-specific tables.
 
 The `[fel4]` table selects the build-target-and-platform pair that your project will be built for,
 along with some book-keeping
 
 ```toml
 [fel4]
-# The Rust build target triple that your fel4 project has selected
+# The Rust build target triple that your feL4 project has selected
 # Currently "x86_64-sel4-fel4" and "armv7-sel4-fel4" are the available options
 target = "x86_64-sel4-fel4"
 
@@ -49,7 +49,7 @@ target = "x86_64-sel4-fel4"
 # "sabre" is available in combination with the "armv7-sel4-fel4" target
 platform = "pc99"
 
-# The path relative to your project root dir where fel4 output build artifacts will be stored
+# The path relative to your project root dir where feL4 output build artifacts will be stored
 artifact-path = "artifacts"
 
 # The path relative to your project root where the Rust target JSON specifications are stored
