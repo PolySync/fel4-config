@@ -49,6 +49,20 @@ pub enum ConfigError {
     TargetPlatformMismatch(SupportedTarget, SupportedPlatform),
 }
 
+/// Returns true if the target and platform are supported to work together
+/// Returns false if the pairing is nonsenical or not supported
+pub fn is_supported_target_platform_pair(
+    target: SupportedTarget,
+    platform: SupportedPlatform,
+) -> bool {
+    match (target, platform) {
+        (SupportedTarget::X8664Sel4Fel4, SupportedPlatform::PC99)
+        | (SupportedTarget::Armv7Sel4Fel4, SupportedPlatform::Sabre)
+        | (SupportedTarget::Aarch64Sel4Fel4, SupportedPlatform::Tx1) => true,
+        _ => false,
+    }
+}
+
 /// Resolve and validate a particular Fel4 configuration for the given
 /// `BuildProfile` and the `selected_target` and `selected_platform` found in
 /// the `FullFel4Manifest`
@@ -58,14 +72,12 @@ pub fn resolve_fel4_config<M: Borrow<FullFel4Manifest>>(
 ) -> Result<Fel4Config, ConfigError> {
     let selected_target = full.borrow().selected_target;
     let platform = full.borrow().selected_platform;
-
-    match (&selected_target, &platform) {
-        (&SupportedTarget::X8664Sel4Fel4, &SupportedPlatform::PC99)
-        | (&SupportedTarget::Armv7Sel4Fel4, &SupportedPlatform::Sabre)
-        | (&SupportedTarget::Aarch64Sel4Fel4, &SupportedPlatform::Tx1) => (),
-        (t, p) => return Err(ConfigError::TargetPlatformMismatch(*t, *p)),
-    };
-
+    if !is_supported_target_platform_pair(selected_target, platform) {
+        return Err(ConfigError::TargetPlatformMismatch(
+            selected_target,
+            platform,
+        ));
+    }
     let target = full
         .borrow()
         .targets
@@ -97,14 +109,9 @@ pub fn resolve_fel4_config<M: Borrow<FullFel4Manifest>>(
             ))
         })?;
     add_properties_to_map(&mut properties, platform_properties)?;
-    let whitelist: HashSet<String> = ALL_PROPERTIES_WHITELIST
-        .iter()
-        .map(|s| s.to_string())
-        .collect();
-    for k in properties.keys() {
-        if !whitelist.contains(k) {
-            return Err(ConfigError::NonWhitelistProperty(k.to_string()));
-        }
+
+    if let Err(k) = contains_only_whitelisted_property_names(properties.keys()) {
+        return Err(ConfigError::NonWhitelistProperty(k.to_string()));
     }
 
     Ok(Fel4Config {
@@ -115,6 +122,28 @@ pub fn resolve_fel4_config<M: Borrow<FullFel4Manifest>>(
         build_profile: *build_profile,
         properties,
     })
+}
+
+/// Check an iterator to see if any of its contents are not found in the
+/// whitelist of allowed properties.
+/// Returns Ok(()) if everything in the iterator is on the whitelist.
+/// If a string is found to be not on the whitelist, it is returned as the data
+/// in the Err()
+pub fn contains_only_whitelisted_property_names<I, T>(iter: I) -> Result<(), String>
+where
+    I: IntoIterator<Item = T>,
+    T: AsRef<str>,
+{
+    let whitelist: HashSet<String> = ALL_PROPERTIES_WHITELIST
+        .iter()
+        .map(|s| s.to_string())
+        .collect();
+    for k in iter {
+        if !whitelist.contains(k.as_ref()) {
+            return Err(k.as_ref().to_string());
+        }
+    }
+    Ok(())
 }
 
 fn add_properties_to_map(
