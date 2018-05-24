@@ -45,6 +45,8 @@ pub enum ConfigError {
     DuplicateProperty(String),
     #[fail(display = "The {} property was supplied, but is not on the permitted whitelist", _0)]
     NonWhitelistProperty(String),
+    #[fail(display = "The {} target is not a supported combination with the {} platform", _0, _1)]
+    TargetPlatformMismatch(SupportedTarget, SupportedPlatform),
 }
 
 /// Resolve and validate a particular Fel4 configuration for the given
@@ -54,8 +56,16 @@ pub fn resolve_fel4_config<M: Borrow<FullFel4Manifest>>(
     full: M,
     build_profile: &BuildProfile,
 ) -> Result<Fel4Config, ConfigError> {
-    let selected_target = full.borrow().selected_target.clone();
-    let platform = full.borrow().selected_platform.clone();
+    let selected_target = full.borrow().selected_target;
+    let platform = full.borrow().selected_platform;
+
+    match (&selected_target, &platform) {
+        (&SupportedTarget::X8664Sel4Fel4, &SupportedPlatform::PC99)
+        | (&SupportedTarget::Armv7Sel4Fel4, &SupportedPlatform::Sabre)
+        | (&SupportedTarget::Aarch64Sel4Fel4, &SupportedPlatform::Tx1) => (),
+        (t, p) => return Err(ConfigError::TargetPlatformMismatch(*t, *p)),
+    };
+
     let target = full
         .borrow()
         .targets
@@ -101,8 +111,8 @@ pub fn resolve_fel4_config<M: Borrow<FullFel4Manifest>>(
         artifact_path: full.borrow().artifact_path.clone(),
         target_specs_path: full.borrow().target_specs_path.clone(),
         target: selected_target,
-        platform: full.borrow().selected_platform.clone(),
-        build_profile: build_profile.clone(),
+        platform: full.borrow().selected_platform,
+        build_profile: *build_profile,
         properties,
     })
 }
@@ -120,7 +130,7 @@ fn add_properties_to_map(
     Ok(())
 }
 
-const ALL_PROPERTIES_WHITELIST: &'static [&'static str] = &[
+const ALL_PROPERTIES_WHITELIST: &[&str] = &[
     "BuildWithCommonSimulationSettings",
     "KernelOptimisation",
     "KernelVerificationBuild",
@@ -319,6 +329,34 @@ mod tests {
         assert_eq!(
             Err(ConfigError::NonWhitelistProperty(
                 "SomeUnallowedProperty".into()
+            )),
+            resolve_fel4_config(manifest, &BuildProfile::Debug)
+        );
+    }
+
+    #[test]
+    fn mismatched_target_platform_pair_gets_caught_in_conflict_resolution() {
+        let manifest = parse_full_manifest(
+            r#"[fel4]
+            target = "x86_64-sel4-fel4"
+            platform = "sabre"
+            artifact-path = "artifacts/path/nested"
+            target-specs-path = "where/are/rust/targets"
+
+            [x86_64-sel4-fel4]
+            KernelArch = "x86"
+
+            [x86_64-sel4-fel4.debug]
+            KernelPrinting = true
+
+            [x86_64-sel4-fel4.sabre]
+            KernelARMPlatform = "sabre"
+            "#,
+        ).expect("Should have been able to parse manifest");
+        assert_eq!(
+            Err(ConfigError::TargetPlatformMismatch(
+                SupportedTarget::X8664Sel4Fel4,
+                SupportedPlatform::Sabre
             )),
             resolve_fel4_config(manifest, &BuildProfile::Debug)
         );
