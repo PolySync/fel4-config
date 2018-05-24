@@ -207,7 +207,7 @@ pub fn toml_to_full_manifest(raw: &toml::Value) -> Result<FullFel4Manifest, Conf
             })?;
 
         targets.insert(
-            curr_target.clone(),
+            curr_target,
             FullFel4Target {
                 identity: curr_target,
                 direct_properties,

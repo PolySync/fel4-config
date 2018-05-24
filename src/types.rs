@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::fmt::{Display, Error as FmtError, Formatter};
 use std::str::FromStr;
 use toml;
 
@@ -43,7 +44,7 @@ pub enum FlatTomlValue {
     Datetime(toml::value::Datetime),
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
 pub enum SupportedTarget {
     X8664Sel4Fel4,
     Armv7Sel4Fel4,
@@ -79,6 +80,12 @@ impl SupportedTarget {
     }
 }
 
+impl Display for SupportedTarget {
+    fn fmt(&self, f: &mut Formatter) -> Result<(), FmtError> {
+        f.write_str(self.full_name())
+    }
+}
+
 impl FromStr for SupportedTarget {
     type Err = String;
 
@@ -92,7 +99,7 @@ impl FromStr for SupportedTarget {
     }
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
 pub enum SupportedPlatform {
     PC99,
     Sabre,
@@ -125,6 +132,12 @@ impl SupportedPlatform {
             .iter()
             .map(|t| t.full_name().into())
             .collect()
+    }
+}
+
+impl Display for SupportedPlatform {
+    fn fmt(&self, f: &mut Formatter) -> Result<(), FmtError> {
+        f.write_str(self.full_name())
     }
 }
 
