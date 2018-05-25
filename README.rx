@@ -4,9 +4,13 @@
 
 -!!-
 
+-""-
+
 ## Getting Started
 
 ### Dependencies
+
+-??-
 
 * -??-
 * [-!!-](-!!-)
@@ -28,10 +32,14 @@
 
 ## Usage
 
--!!-
+-!!-<!-- Usage prose explanation -->
 
-```-!!-
+-""-
+
+```-!!-<!-- At least one code example -->
 ```
+
+* -??-<!-- Arbitrary extra usage explanation -->
 
 ### Examples
 

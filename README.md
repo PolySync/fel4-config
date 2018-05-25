@@ -1,8 +1,8 @@
 # fel4-config
 
-Parsing, transformation and validation for feL4 manifests.
-
 ## Overview
+
+Parsing, transformation and validation for feL4 manifests.
 
 The primary purpose of this library is to parse and validate [fel4.toml](examples/exemplar.toml)
 files, which contain configuration options relevant to building seL4
@@ -22,8 +22,17 @@ by the [libsel4-sys](https://github.com/PolySync/libsel4-sys) repository.
 
 `fel4-config` should build on the stable or nightly Rust toolchains.
 
-```
+```bash
 cargo build
+```
+
+### Installation
+
+fel4-config may be included in your Rust project by adding the following
+to your Cargo.toml dependencies.
+
+```toml
+fel4-config = { git = "ssh://github.com/PolySync/fel4-config.git", branch = "master" }
 ```
 
 ## Usage
@@ -31,7 +40,6 @@ cargo build
 feL4 manifest files are typically named `fel4.toml` and live at the root directory of a
 feL4 project.  You typically don't have to manufacture them from scratch, as the
 cargo-fel4 tool will generate a complete manifest as part of the `cargo fel4 new` command.
-
 
 A feL4 manifest consists of a `[fel4]` header section followed by target-specific tables.
 
@@ -55,11 +63,9 @@ artifact-path = "artifacts"
 # The path relative to your project root where the Rust target JSON specifications are stored
 # `cargo fel4 new` will generate these specifications for you by default
 target-specs-path = "target_specs"
-```
 
-For the target triple you have selected, there ought to be a toml table and a few nested subtables.
-
-```toml
+# For the target triple you have selected, there ought to be a toml table
+# and a few nested subtables.
 
 # The top-level target table,
 [x86_64-sel4-fel4]
@@ -87,53 +93,61 @@ KernelPrinting = false
 
 ```
 
+* There are two key types provided by `fel4-config`, `FullFel4Manifest` and `Fel4Config`.
+  `FullFel4Manifest` represents the entire contents of a fel4.toml,
+  and can be produced by means of `get_full_manifest(::std::path::Path::new("./fel4.toml"))?` or `parse_full_manifest`.
+  These methods conduct parsing and basic validation of the manifest contents.
+
+  `Fel4Config` represents a coalesced subset of the contents of a manifest,
+  applied for a particular target, platform, and build profile. You can
+  create a `Fel4Config` from a `FullFel4Manifest` using `resolve_fel4_config`.
+
+  ```rust
+  let full:FullFel4Manifest = get_full_manifest(manifest_file.path())
+      .expect("Should be able to read the fel4.toml file");
+  let config:Fel4Config = resolve_fel4_config(full, &BuildProfile::Debug)
+      .expect("Should have been able to resolve a config");
+  ```
+
+  `Fel4Config` contains a resolved, deduplicated set of configuration properties.
+
+  Current applications include use in `libsel4-sys` CMake configuration, `cargo-fel4` code generation, and so forth.
+
+  See the generated Rust documents for details on individual types and functions.
+
+  ```bash
+  cargo doc --open
+  ```
+
 ### Examples
 
-You can find a complete example in this repository at [examples/exemplar.toml](examples/exemplar.toml).
-
-### API
-
-There are two key types provided by `fel4-config`, `FullFel4Manifest` and `Fel4Config`.
-
-`FullFel4Manifest` represents the entire contents of a fel4.toml,
-and can be produced by means of `get_full_manifest(::std::path::Path::new("./fel4.toml"))?` or `parse_full_manifest`.
-These methods conduct parsing and basic validation of the manifest contents.
-
-`Fel4Config` represents a coalesced subset of the contents of a manifest,
-applied for a particular target, platform, and build profile. You can
-create a `Fel4Config` from a `FullFel4Manifest` using `resolve_fel4_config`.
-
-```rust
-let full:FullFel4Manifest = get_full_manifest(manifest_file.path())
-    .expect("Should be able to read the fel4.toml file");
-let config:Fel4Config = resolve_fel4_config(full, &BuildProfile::Debug)
-    .expect("Should have been able to resolve a config");
-```
-
-`Fel4Config` contains a resolved, deduplicated set of configuration properties.
-
-Current applications include use in `libsel4-sys` CMake configuration, `cargo-fel4` code generation, and so forth.
-
-See the generated Rust documents for details on individual types and functions.
-
-```
-cargo doc --open
-```
+* You can find a complete fel4.toml example in this repository at [examples/exemplar.toml](examples/exemplar.toml).
 
 ## Tests
 
-### Test Dependencies
+fel4-config makes use of the integrated test framework in Rust. Test dependencies are managed through Cargo.toml `[dev-dependencies]`
 
-Managed through Cargo.toml `[dev-dependencies]`
+### Building
 
-### Running Tests
+To confirm that the tests build correctly:
+
+```bash
+cargo build --tests
+```
+
+### Running
 
 Tests are executable in the usual way for Rust projects:
 
-```
+```bash
 cargo test
 ```
 
 # License
 
-fel4-config is released under the MIT license
+© 2018, PolySync Technologies, Inc.
+
+* Zack Pierce [email](mailto:zpierce@polysync.io)
+* Jon Lamb [email](mailto:jlamb@polysync.io)
+
+Please see the [LICENSE](./LICENSE) file for more details
