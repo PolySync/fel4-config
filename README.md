@@ -49,12 +49,13 @@ along with some book-keeping
 ```toml
 [fel4]
 # The Rust build target triple that your feL4 project has selected
-# Currently "x86_64-sel4-fel4" and "armv7-sel4-fel4" are the available options
+# Currently "x86_64-sel4-fel4", "armv7-sel4-fel4", and "aarch64-sel4-fel4" are the available options
 target = "x86_64-sel4-fel4"
 
 # The associated platform for your build target.
 # "pc99" is available in combination with the "x86_64-sel4-fel4" target
 # "sabre" is available in combination with the "armv7-sel4-fel4" target
+# "tx1" is available in combination with the "aarch64-sel4-fel4" target
 platform = "pc99"
 
 # The path relative to your project root dir where feL4 output build artifacts will be stored
