@@ -32,7 +32,7 @@ fel4-config may be included in your Rust project by adding the following
 to your Cargo.toml dependencies.
 
 ```toml
-fel4-config = { git = "ssh://github.com/PolySync/fel4-config.git", branch = "master" }
+fel4-config = { git = "https://github.com/PolySync/fel4-config.git", branch = "master" }
 ```
 
 ## Usage
