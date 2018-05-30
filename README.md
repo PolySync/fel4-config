@@ -22,18 +22,26 @@ by the [libsel4-sys](https://github.com/PolySync/libsel4-sys) repository.
 
 `fel4-config` should build on the stable or nightly Rust toolchains.
 
-```bash
-cargo build
-```
+* Acquire a [Rust toolchain](https://rustup.rs/)
+* Retrieve the repository from git:
+  ```
+  git clone git@github.com:PolySync/fel4-config.git
+  cd fel4-config
+  ```
+* Build using cargo
+  ````bash
+  cargo build
+  ```
 
 ### Installation
 
 fel4-config may be included in your Rust project by adding the following
-to your Cargo.toml dependencies.
+to your Cargo.toml.
 
-```toml
-fel4-config = { git = "https://github.com/PolySync/fel4-config.git", branch = "master" }
-```
+* In your relevant `[dependencies]` section:
+  ````toml
+  fel4-config = { git = "https://github.com/PolySync/fel4-config.git", branch = "master" }
+  ```
 
 ## Usage
 
