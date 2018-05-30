@@ -24,12 +24,14 @@ by the [libsel4-sys](https://github.com/PolySync/libsel4-sys) repository.
 
 * Acquire a [Rust toolchain](https://rustup.rs/)
 * Retrieve the repository from git:
-  ```
+  
+  ```bash
   git clone git@github.com:PolySync/fel4-config.git
   cd fel4-config
   ```
 * Build using cargo
-  ````bash
+  
+  ```bash
   cargo build
   ```
 
@@ -39,7 +41,8 @@ fel4-config may be included in your Rust project by adding the following
 to your Cargo.toml.
 
 * In your relevant `[dependencies]` section:
-  ````toml
+  
+  ```
   fel4-config = { git = "https://github.com/PolySync/fel4-config.git", branch = "master" }
   ```
 
